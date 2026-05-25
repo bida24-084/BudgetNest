@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BudgetNest — Student Marketplace</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BudgetNest">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --ink:          #1a2e1e;
+    --paper:        #f7f4ef;
+    --cream:        #ede9e1;
+    --card:         #ffffff;
+    --green:        #2d6a4f;
+    --green-mid:    #40916c;
+    --green-light:  #52b788;
+    --green-pale:   #d8f3dc;
+    --warm:         #e76f51;
+    --warm-light:   #f4a261;
+    --muted:        #6b7280;
+    --border:       #e0dbd2;
+    --radius:       18px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--ink);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── BACKGROUND DECORATION ── */
+  .bg-dec {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .bg-dec::before {
+    content: '';
+    position: absolute; top: -120px; right: -120px;
+    width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(82,183,136,0.18) 0%, transparent 70%);
+  }
+  .bg-dec::after {
+    content: '';
+    position: absolute; bottom: -80px; left: -80px;
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(231,111,81,0.12) 0%, transparent 70%);
+  }
+
+  /* ── PAGE WRAPPER ── */
+  .page {
+    position: relative; z-index: 1;
+    width: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  /* ── LOGO ── */
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    color: var(--paper);
+    margin-bottom: 6px;
+    animation: fadeDown 0.6s ease both;
+  }
+  .logo em { color: var(--warm); font-style: italic; }
+
+  .logo-tagline {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--green-light); text-transform: uppercase;
+    margin-bottom: 52px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  /* ── PORTAL HEADING ── */
+  .portal-heading {
+    text-align: center; margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .portal-heading h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 4vw, 34px);
+    color: var(--paper); line-height: 1.2; margin-bottom: 10px;
+  }
+  .portal-heading h1 em { color: var(--green-light); font-style: italic; }
+  .portal-heading p {
+    font-size: 14px; color: rgba(247,244,239,0.55); max-width: 380px; margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── PORTAL CARDS ── */
+  .portal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%; max-width: 780px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .portal-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 36px 28px 32px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .portal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  .portal-card.student:hover { border-color: var(--green-light); }
+  .portal-card.business:hover { border-color: var(--warm); }
+
+  /* card top accent stripe */
+  .portal-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  }
+  .portal-card.student::before { background: var(--green); }
+  .portal-card.business::before { background: var(--warm); }
+
+  /* big decorative circle bg */
+  .portal-card::after {
+    content: '';
+    position: absolute; bottom: -40px; right: -40px;
+    width: 140px; height: 140px; border-radius: 50%;
+    opacity: 0.06; transition: opacity 0.3s, transform 0.3s;
+  }
+  .portal-card.student::after { background: var(--green); }
+  .portal-card.business::after { background: var(--warm); }
+  .portal-card:hover::after { opacity: 0.12; transform: scale(1.15); }
+
+  .card-icon {
+    width: 60px; height: 60px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 22px; font-size: 26px; flex-shrink: 0;
+  }
+  .student .card-icon { background: var(--green-pale); }
+  .business .card-icon { background: #fde8e0; }
+
+  /* SVG icons */
+  .card-icon svg { width: 28px; height: 28px; }
+  .student .card-icon svg { stroke: var(--green); }
+  .business .card-icon svg { stroke: var(--warm); }
+
+  .card-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .student .card-label { color: var(--green); }
+  .business .card-label { color: var(--warm); }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--ink); line-height: 1.2; margin-bottom: 12px;
+  }
+  .card-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.65; flex: 1;
+  }
+
+  .card-cta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 28px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .card-cta span {
+    font-size: 13px; font-weight: 700;
+  }
+  .student .card-cta span { color: var(--green); }
+  .business .card-cta span { color: var(--warm); }
+  .card-cta-arrow {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .student .card-cta-arrow { background: var(--green-pale); color: var(--green); }
+  .business .card-cta-arrow { background: #fde8e0; color: var(--warm); }
+  .portal-card:hover .card-cta-arrow { transform: translateX(4px); }
+
+  /* ── PANEL SYSTEM ── */
+  .portal-view {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .panel-view {
+    display: none;
+    flex-direction: column; align-items: center;
+    min-height: 100vh;
+    background: var(--paper);
+    width: 100%;
+  }
+  .panel-view.open {
+    display: flex;
+    animation: panelIn 0.3s ease both;
+  }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PANEL HEADER ── */
+  .panel-header {
+    width: 100%; max-width: 520px;
+    padding: 40px 0 30px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .back-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--cream); border: 1.5px solid var(--border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.2s;
+    font-size: 18px; color: var(--muted);
+  }
+  .back-btn:hover { background: var(--border); }
+  .panel-title-wrap { flex: 1; }
+  .panel-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .student-panel .panel-label { color: var(--green); }
+  .business-panel .panel-label { color: var(--warm); }
+  .panel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--ink);
+  }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    width: 100%; max-width: 520px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: 1.5px solid var(--border);
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--muted); margin-bottom: 7px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; font-family: 'Sora', sans-serif; font-size: 14px;
+    color: var(--ink); background: var(--paper); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--green-light);
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.12);
+  }
+  .business-panel .form-group input:focus,
+  .business-panel .form-group select:focus,
+  .business-panel .form-group textarea:focus {
+    border-color: var(--warm);
+    box-shadow: 0 0 0 3px rgba(231,111,81,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .form-group select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* student ID hint box */
+  .id-hint {
+    background: var(--green-pale); border-radius: 10px;
+    padding: 12px 14px; font-size: 12px; color: var(--green);
+    margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start;
+    line-height: 1.5;
+  }
+  .id-hint-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+
+  /* contact info box */
+  .contact-box {
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 22px;
+    border: 1.5px solid;
+  }
+  .contact-box.warm-box { background: #fff8f6; border-color: #f4c5b6; }
+  .contact-box h4 {
+    font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px;
+  }
+  .contact-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--muted); margin-bottom: 7px; line-height: 1.4;
+  }
+  .contact-item:last-child { margin-bottom: 0; }
+  .contact-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    background: var(--warm);
+  }
+  .contact-item strong { color: var(--ink); }
+
+  /* submit buttons */
+  .btn-submit {
+    width: 100%; border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700;
+    padding: 14px; border-radius: 40px; color: #fff;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 6px;
+  }
+  .btn-submit:hover { opacity: 0.88; }
+  .btn-submit:active { transform: scale(0.98); }
+  .student-panel .btn-submit { background: var(--green); }
+  .business-panel .btn-submit { background: var(--warm); }
+
+  /* password toggle */
+  .input-wrap { position: relative; }
+  .input-wrap input { padding-right: 48px; }
+  .pw-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    font-size: 18px; line-height: 1; padding: 4px;
+  }
+
+  /* divider */
+  .form-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0; color: var(--muted); font-size: 12px;
+  }
+  .form-divider::before, .form-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── SUCCESS STATE ── */
+  .success-state {
+    text-align: center; padding: 40px 20px;
+    display: none; flex-direction: column; align-items: center;
+  }
+  .success-state.show { display: flex; }
+  .success-circle {
+    width: 72px; height: 72px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin-bottom: 18px;
+  }
+  .student-panel .success-circle { background: var(--green-pale); }
+  .business-panel .success-circle { background: #fde8e0; }
+  .success-state h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--ink); margin-bottom: 8px;
+  }
+  .success-state p { font-size: 13px; color: var(--muted); line-height: 1.65; max-width: 320px; }
+  .success-btn {
+    margin-top: 24px; background: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 11px 28px; border-radius: 40px;
+    transition: background 0.2s;
+  }
+  .student-panel .success-btn { border: 2px solid var(--green); color: var(--green); }
+  .student-panel .success-btn:hover { background: var(--green-pale); }
+  .business-panel .success-btn { border: 2px solid var(--warm); color: var(--warm); }
+  .business-panel .success-btn:hover { background: #fde8e0; }
+
+  /* ── FOOTER ── */
+  .portal-footer {
+    margin-top: 48px; text-align: center;
+    font-size: 11px; color: rgba(247,244,239,0.3);
+    animation: fadeUp 0.6s 0.5s ease both;
+    line-height: 1.8;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 580px) {
+    .portal-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-card { padding: 28px 20px; }
+    .portal-heading h1 { font-size: 24px; }
+    .logo { font-size: 30px; }
+  }
+
+  /* ── NEW: auth tabs ── */
+  .auth-tabs{display:flex;background:var(--cream);border-radius:40px;padding:4px;width:100%;max-width:520px;margin-bottom:18px}
+  .auth-tab{flex:1;padding:10px 6px;border-radius:40px;border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--muted);transition:all .18s;text-align:center}
+  .auth-tab.active{background:var(--card);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .student-panel .auth-tab.active{color:var(--green)}
+  .business-panel .auth-tab.active{color:var(--warm)}
+  .form-section{display:none}
+  .form-section.active{display:block}
+  .info-box{border-radius:10px;padding:12px 14px;font-size:12px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;line-height:1.55}
+  .info-box.green{background:var(--green-pale);color:var(--green)}
+  .info-box.warm{background:#fde8e0;color:var(--warm)}
+  .info-icon{flex-shrink:0;font-size:14px;margin-top:1px}
+  .forgot-link{display:block;text-align:right;font-size:12px;color:var(--muted);cursor:pointer;background:none;border:none;font-family:'Sora',sans-serif;margin-top:-8px;margin-bottom:14px}
+  .forgot-link:hover{color:var(--green)}
+  .business-panel .forgot-link:hover{color:var(--warm)}
+  .switch-mode{text-align:center;font-size:12px;color:var(--muted);margin-top:14px}
+  .switch-link{font-weight:700;cursor:pointer;border:none;background:none;font-family:'Sora',sans-serif;font-size:12px;padding:0}
+  .student-panel .switch-link{color:var(--green)}
+  .business-panel .switch-link{color:var(--warm)}
+  .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:12px 22px;border-radius:40px;opacity:0;transition:all .28s;pointer-events:none;z-index:300;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--warm)}
+  .reset-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:20px}
+  .reset-overlay.open{display:flex}
+  .reset-box{background:var(--card);border-radius:16px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+  .reset-box h3{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:8px}
+  .reset-box p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+  .reset-foot{display:flex;gap:10px;margin-top:16px}
+  .btn-cancel{flex:1;background:var(--cream);border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:10px;color:var(--ink)}
+  .btn-send{flex:2;background:var(--green);border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:10px;color:#fff}
+</style>
+</head>
+<body>
+
+<div class="bg-dec"></div>
+
+<!-- PORTAL -->
+<div class="portal-view" id="portal-view">
+  <div class="logo">Budget<em>Nest</em></div>
+  <div class="logo-tagline">Student Marketplace &middot; Botswana</div>
+  <div class="portal-heading">
+    <h1>Welcome. <em>Who are you?</em></h1>
+    <p>Choose your path to access the BudgetNest platform built for Gaborone students.</p>
+  </div>
+  <div class="portal-grid">
+    <div class="portal-card student" onclick="openPanel('student')">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z"/>
+          <path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>
+        </svg>
+      </div>
+      <div class="card-label">For Students</div>
+      <div class="card-title">I'm a student looking for deals</div>
+      <div class="card-desc">Sign up or log in with your Student ID to browse affordable accommodation, food, services and more.</div>
+      <div class="card-cta">
+        <span>Sign up / Log in &rarr;</span>
+        <div class="card-cta-arrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="portal-card business" onclick="openPanel('business')">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/>
+          <line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <div class="card-label">For Businesses &amp; Individuals</div>
+      <div class="card-title">I want to list products or services</div>
+      <div class="card-desc">Register your business or log in to manage your listings and reach thousands of Gaborone campus students.</div>
+      <div class="card-cta">
+        <span>Sign up / Log in &rarr;</span>
+        <div class="card-cta-arrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="portal-footer">
+    BudgetNest &middot; BAC Gaborone &middot; ICT205 Entrepreneurship Development<br>
+    Powered by BudgetNest Team
+    <br><a href="admin.html" style="color:rgba(247,244,239,.2);font-size:10px;text-decoration:none;display:inline-block;margin-top:6px">Admin Portal &rarr;</a>
+  </div>
+</div>
+
+
+<!-- STUDENT PANEL -->
+<div class="panel-view student-panel" id="student-panel">
+  <div class="panel-header">
+    <button class="back-btn" onclick="closePanel('student')" aria-label="Back">&#8592;</button>
+    <div>
+      <div class="panel-label">Student Access</div>
+      <div class="panel-title">BudgetNest for Students</div>
+    </div>
+  </div>
+  <div class="auth-tabs" id="student-tabs">
+    <button class="auth-tab active" id="s-tab-signup" onclick="switchTab('student','signup')">Create account</button>
+    <button class="auth-tab"        id="s-tab-login"  onclick="switchTab('student','login')">Log in</button>
+  </div>
+  <div class="form-card" id="student-form-card">
+    <!-- SIGN UP -->
+    <div class="form-section active" id="s-signup">
+      <div class="info-box green">
+        <span class="info-icon">&#8505;</span>
+        <span>Your Student ID (e.g. <strong>BIDA24-084</strong>) verifies you are an active student. Use your institutional email where possible.</span>
+      </div>
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="ss-name" placeholder="e.g. Lone Baithei" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label>Institution</label>
+        <select id="ss-institution">
+          <option value="">Select your institution&hellip;</option>
+          <option value="BAC">BAC &mdash; Botswana Accountancy College</option>
+          <option value="UB">UB &mdash; University of Botswana</option>
+          <option value="BUAN">BUAN &mdash; Botswana University of Agriculture</option>
+          <option value="Limkokwing">Limkokwing University</option>
+          <option value="BIUST">BIUST</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Student ID</label>
+        <input type="text" id="ss-id" placeholder="e.g. BIDA24-084" autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="ss-email" placeholder="student@thuto.bac.bw" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="ss-password" placeholder="At least 6 characters" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('ss-password',this)">&#128065;</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm password</label>
+        <div class="input-wrap">
+          <input type="password" id="ss-confirm" placeholder="Repeat your password" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('ss-confirm',this)">&#128065;</button>
+        </div>
+      </div>
+      <button class="btn-submit" id="ss-btn" onclick="doStudentSignup()">Create student account</button>
+      <div class="switch-mode">Already have an account? <button class="switch-link" onclick="switchTab('student','login')">Log in here</button></div>
+    </div>
+    <!-- LOGIN -->
+    <div class="form-section" id="s-login">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="sl-email" placeholder="student@thuto.bac.bw" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="sl-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doStudentLogin()"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('sl-password',this)">&#128065;</button>
+        </div>
+      </div>
+      <button class="forgot-link" type="button" onclick="openReset()">Forgot password?</button>
+      <button class="btn-submit" id="sl-btn" onclick="doStudentLogin()">Log in to marketplace</button>
+      <div class="switch-mode">New student? <button class="switch-link" onclick="switchTab('student','signup')">Create an account</button></div>
+    </div>
+  </div>
+  <div class="success-state" id="student-success">
+    <div class="success-circle">&#127891;</div>
+    <h3 id="student-success-name">Welcome!</h3>
+    <p id="student-success-msg">Redirecting to the BudgetNest marketplace&hellip;</p>
+    <button class="success-btn" onclick="window.location.href='BudgetNest.html'">Open marketplace now</button>
+  </div>
+</div>
+
+
+<!-- BUSINESS PANEL -->
+<div class="panel-view business-panel" id="business-panel">
+  <div class="panel-header">
+    <button class="back-btn" onclick="closePanel('business')" aria-label="Back">&#8592;</button>
+    <div>
+      <div class="panel-label">Business &amp; Individual Access</div>
+      <div class="panel-title">List on BudgetNest</div>
+    </div>
+  </div>
+  <div class="auth-tabs" id="business-tabs">
+    <button class="auth-tab active" id="b-tab-signup"  onclick="switchTab('business','signup')">Register</button>
+    <button class="auth-tab"        id="b-tab-login"   onclick="switchTab('business','login')">Log in</button>
+    <button class="auth-tab"        id="b-tab-enquiry" onclick="switchTab('business','enquiry')">Enquiry</button>
+  </div>
+  <div class="form-card" id="business-form-card">
+    <!-- REGISTER -->
+    <div class="form-section active" id="b-signup">
+      <div class="info-box warm">
+        <span class="info-icon">&#8505;</span>
+        <span>Register to create and manage your own listings. Our admin team verifies your business within 24 hours before listings go live.</span>
+      </div>
+      <div class="form-group">
+        <label>Contact person&#39;s name</label>
+        <input type="text" id="bs-name" placeholder="Your full name" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label>Business / trading name</label>
+        <input type="text" id="bs-bizname" placeholder="e.g. Naledi Hair Studio"/>
+      </div>
+      <div class="f-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="bs-category">
+            <option value="">Select&hellip;</option>
+            <option value="accommodation">Accommodation</option>
+            <option value="food">Food supplies</option>
+            <option value="salon">Salon &amp; beauty</option>
+            <option value="furniture">Furniture</option>
+            <option value="tuition">Tuition</option>
+            <option value="laundry">Laundry</option>
+            <option value="repairs">Repairs</option>
+            <option value="retail">Retail shop</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>WhatsApp number</label>
+          <input type="tel" id="bs-phone" placeholder="+267 7X XXX XXX" autocomplete="tel"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="bs-email" placeholder="business@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="bs-password" placeholder="At least 6 characters" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('bs-password',this)">&#128065;</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm password</label>
+        <div class="input-wrap">
+          <input type="password" id="bs-confirm" placeholder="Repeat your password" autocomplete="new-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('bs-confirm',this)">&#128065;</button>
+        </div>
+      </div>
+      <button class="btn-submit" id="bs-btn" onclick="doBusinessSignup()">Register my business</button>
+      <div class="switch-mode">Already registered? <button class="switch-link" onclick="switchTab('business','login')">Log in here</button></div>
+    </div>
+    <!-- LOGIN -->
+    <div class="form-section" id="b-login">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="bl-email" placeholder="business@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="bl-password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doBusinessLogin()"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('bl-password',this)">&#128065;</button>
+        </div>
+      </div>
+      <button class="forgot-link" type="button" onclick="openReset()">Forgot password?</button>
+      <button class="btn-submit" id="bl-btn" onclick="doBusinessLogin()">Log in</button>
+      <div class="switch-mode">New business? <button class="switch-link" onclick="switchTab('business','signup')">Register here</button></div>
+    </div>
+    <!-- ENQUIRY -->
+    <div class="form-section" id="b-enquiry">
+      <div class="contact-box warm-box">
+        <h4>Not ready to register? Send us a message instead.</h4>
+        <div class="contact-item"><div class="contact-dot"></div><span><strong>Lelentle Abigail</strong> (Team Leader) &mdash; BIDA24-084</span></div>
+        <div class="contact-item"><div class="contact-dot"></div><span><strong>Lone Baithei</strong> (Tech Lead) &mdash; BIDA24-344</span></div>
+        <div class="contact-item"><div class="contact-dot"></div><span><strong>Email:</strong> budgetnest@student.bac.bw</span></div>
+        <div class="contact-item"><div class="contact-dot"></div><span><strong>WhatsApp:</strong> +267 7X XXX XXX</span></div>
+      </div>
+      <div class="form-group"><label>Your name</label><input type="text" id="be-name" placeholder="Full name or business name"/></div>
+      <div class="f-row">
+        <div class="form-group"><label>WhatsApp / Phone</label><input type="tel" id="be-phone" placeholder="+267 7X XXX XXX"/></div>
+        <div class="form-group"><label>Email (optional)</label><input type="email" id="be-email" placeholder="your@email.com"/></div>
+      </div>
+      <div class="form-group">
+        <label>What are you listing?</label>
+        <select id="be-category">
+          <option value="">Select a category&hellip;</option>
+          <option>Accommodation / Room rental</option>
+          <option>Food supplies / Meal prep</option>
+          <option>Salon / Beauty services</option>
+          <option>Furniture (sell or hire)</option>
+          <option>Tuition / Academic support</option>
+          <option>Laundry services</option>
+          <option>Repairs (phone, laptop etc.)</option>
+          <option>Retail shop / General goods</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Brief description &amp; pricing</label>
+        <textarea id="be-desc" placeholder="Describe what you're offering, your pricing, and location near campus&hellip;"></textarea>
+      </div>
+      <button class="btn-submit" id="be-btn" onclick="doEnquiry()">Send enquiry to our team</button>
+      <p style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center;line-height:1.6;">We do not share your contact details without your permission.</p>
+    </div>
+  </div>
+  <div class="success-state" id="business-success">
+    <div class="success-circle">&#127978;</div>
+    <h3 id="business-success-name">Done!</h3>
+    <p id="business-success-msg">Our team will be in touch within 24 hours.</p>
+    <button class="success-btn" onclick="closePanel('business')">Back to portal</button>
+  </div>
+</div>
+
+
+<!-- RESET PASSWORD OVERLAY -->
+<div class="reset-overlay" id="reset-overlay" onclick="if(event.target===this)closeReset()">
+  <div class="reset-box">
+    <h3>Reset your password</h3>
+    <p>Enter your email address and we&#39;ll send you a reset link.</p>
+    <div class="form-group">
+      <label>Email address</label>
+      <input type="email" id="reset-email" placeholder="your@email.com"/>
+    </div>
+    <div class="reset-foot">
+      <button class="btn-cancel" onclick="closeReset()">Cancel</button>
+      <button class="btn-send"   onclick="doReset()">Send reset link</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { signUpStudent, signUpBusiness, login, sendPasswordReset, resendConfirmation } from './auth.js';
+import { supabase } from './supabaseClient.js';
+
+window.openPanel = function(type) {
+  document.getElementById('portal-view').style.display = 'none';
+  var p = document.getElementById(type + '-panel');
+  if (p) { p.classList.add('open'); window.scrollTo(0,0); }
+};
+window.closePanel = function(type) {
+  var p = document.getElementById(type + '-panel');
+  if (p) p.classList.remove('open');
+  document.getElementById('portal-view').style.display = '';
+  var suc = document.getElementById(type + '-success');
+  if (suc) suc.classList.remove('show');
+  var fc = document.getElementById(type + '-form-card');
+  if (fc) fc.style.display = '';
+  var tabs = document.getElementById(type + '-tabs');
+  if (tabs) tabs.style.display = '';
+  window.scrollTo(0,0);
+};
+window.switchTab = function(panel, tab) {
+  var pre = panel === 'student' ? 's' : 'b';
+  document.querySelectorAll('#' + panel + '-tabs .auth-tab')
+    .forEach(function(b){ b.classList.remove('active'); });
+  var tb = document.getElementById(pre + '-tab-' + tab);
+  if (tb) tb.classList.add('active');
+  document.querySelectorAll('#' + panel + '-panel .form-section')
+    .forEach(function(s){ s.classList.remove('active'); });
+  var sec = document.getElementById(pre + '-' + tab);
+  if (sec) sec.classList.add('active');
+};
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var panel = p.get('panel'), tab = p.get('tab');
+  if (panel === 'student' || panel === 'business') {
+    setTimeout(function(){ window.openPanel(panel); if(tab) window.switchTab(panel,tab); }, 80);
+  }
+})();
+window.togglePw = function(id, btn) {
+  var el = document.getElementById(id); if (!el) return;
+  el.type = el.type === 'password' ? 'text' : 'password';
+  btn.textContent = el.type === 'password' ? '\uD83D\uDC41' : '\uD83D\uDE48';
+};
+function busy(id, on, label) {
+  var b = document.getElementById(id); if (!b) return;
+  b.disabled = on; b.textContent = on ? 'Please wait\u2026' : label;
+}
+function toast(msg, err) {
+  var el = document.getElementById('toast'); if (!el) return;
+  el.textContent = msg;
+  el.className = 'toast' + (err ? ' err' : '') + ' show';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('show'); }, 3600);
+}
+function shake(id, msg) {
+  var el = document.getElementById(id); if (!el) return;
+  el.style.borderColor = '#e76f51';
+  el.style.boxShadow = '0 0 0 3px rgba(231,111,81,.15)';
+  try { el.focus(); } catch(e2) {}
+  setTimeout(function(){ el.style.borderColor=''; el.style.boxShadow=''; }, 1800);
+  var par = (el.closest ? el.closest('.form-group') : null) || el.parentElement;
+  var tip = par ? par.querySelector('.field-tip') : null;
+  if (!tip && par) {
+    tip = document.createElement('div');
+    tip.className = 'field-tip';
+    tip.style.cssText = 'font-size:11px;color:#e76f51;margin-top:5px;font-weight:600;';
+    par.appendChild(tip);
+  }
+  if (tip) { tip.textContent = msg; setTimeout(function(){ if(tip.parentNode)tip.remove(); }, 2600); }
+}
+function emailOk(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function showSuccess(panel, name, msg) {
+  var fc=document.getElementById(panel+'-form-card');
+  var tabs=document.getElementById(panel+'-tabs');
+  if(fc) fc.style.display='none';
+  if(tabs) tabs.style.display='none';
+  var n=document.getElementById(panel+'-success-name');
+  var m=document.getElementById(panel+'-success-msg');
+  if(n) n.textContent=name; if(m) m.textContent=msg;
+  var s=document.getElementById(panel+'-success');
+  if(s) s.classList.add('show');
+}
+function showConfirmNudge(panel, mail) {
+  var fc=document.getElementById(panel+'-form-card');
+  var tabs=document.getElementById(panel+'-tabs');
+  if(fc) fc.style.display='none';
+  if(tabs) tabs.style.display='none';
+  var suc=document.getElementById(panel+'-success'); if(!suc) return;
+  suc.innerHTML=[
+    '<div class="success-circle">&#9993;</div>',
+    '<h3>Confirm your email first</h3>',
+    '<p>We sent a confirmation link to <strong>'+mail+'</strong>.',
+    ' Click it to activate your account, then log in here.</p>',
+    '<p style="margin-top:10px;font-size:12px;color:var(--muted)">Cannot find it? Check your spam folder.</p>',
+    '<button class="success-btn" style="margin-top:18px" onclick="window.doResend(this)">Resend confirmation email</button>',
+    '<button class="success-btn" style="margin-top:10px;opacity:.6" onclick="window.closePanel(\''+panel+'\')">Back to portal</button>'
+  ].join('');
+  var btn=suc.querySelector('.success-btn');
+  if(btn){ btn.dataset.panel=panel; btn.dataset.mail=mail; }
+  suc.classList.add('show');
+}
+window.doResend = async function(btn) {
+  var panel=btn.dataset.panel, mail=btn.dataset.mail;
+  btn.disabled=true; btn.textContent='Sending\u2026';
+  var r=await resendConfirmation(mail);
+  toast(r.success?'Confirmation email resent \u2014 check your inbox':(r.error||'Could not resend.'),!r.success);
+  btn.disabled=false; btn.textContent='Resend confirmation email';
+};
+
+// STUDENT SIGN UP
+window.doStudentSignup = async function() {
+  var name=document.getElementById('ss-name').value.trim();
+  var inst=document.getElementById('ss-institution').value;
+  var sid=document.getElementById('ss-id').value.trim();
+  var mail=document.getElementById('ss-email').value.trim();
+  var pw=document.getElementById('ss-password').value;
+  var pw2=document.getElementById('ss-confirm').value;
+  if(!name) return shake('ss-name','Please enter your full name.');
+  if(!inst) return shake('ss-institution','Please select your institution.');
+  if(!sid)  return shake('ss-id','Please enter your Student ID.');
+  if(!emailOk(mail)) return shake('ss-email','Please enter a valid email address.');
+  if(pw.length<6) return shake('ss-password','Password must be at least 6 characters.');
+  if(pw!==pw2) return shake('ss-confirm','Passwords do not match.');
+  busy('ss-btn',true,'Create student account');
+  var r=await signUpStudent({email:mail,password:pw,fullName:name,studentId:sid,institution:inst});
+  busy('ss-btn',false,'Create student account');
+  if(r.error){
+    if(r.error.toLowerCase().includes('already')){
+      shake('ss-email','This email already has an account. Try logging in.');
+      window.switchTab('student','login');
+      var el=document.getElementById('sl-email'); if(el) el.value=mail;
+    } else shake('ss-email',r.error);
+    return;
+  }
+  if(r.needsConfirmation){ showSuccess('student','Check your email!','We sent a confirmation link to '+mail+'. Click it, then come back to log in.'); return; }
+  showSuccess('student','Welcome, '+name.split(' ')[0]+'!','Account created! Taking you to the marketplace\u2026');
+  setTimeout(function(){ window.location.href='BudgetNest.html'; },2200);
+};
+
+// STUDENT LOGIN
+window.doStudentLogin = async function() {
+  var mail=document.getElementById('sl-email').value.trim();
+  var pw=document.getElementById('sl-password').value;
+  if(!emailOk(mail)) return shake('sl-email','Please enter your email address.');
+  if(!pw) return shake('sl-password','Please enter your password.');
+  busy('sl-btn',true,'Log in to marketplace');
+  var r=await login(mail,pw);
+  busy('sl-btn',false,'Log in to marketplace');
+  if(r.error){ if(r.error==='EMAIL_NOT_CONFIRMED') showConfirmNudge('student',mail); else shake('sl-password',r.error); return; }
+  var first=(r.profile&&r.profile.full_name?r.profile.full_name:mail).split(' ')[0];
+  showSuccess('student','Welcome back, '+first+'!','Logged in. Taking you to the marketplace\u2026');
+  setTimeout(function(){ window.location.href='BudgetNest.html'; },2000);
+};
+
+// BUSINESS SIGN UP
+window.doBusinessSignup = async function() {
+  var name=document.getElementById('bs-name').value.trim();
+  var biz=document.getElementById('bs-bizname').value.trim();
+  var cat=document.getElementById('bs-category').value;
+  var phone=document.getElementById('bs-phone').value.trim();
+  var mail=document.getElementById('bs-email').value.trim();
+  var pw=document.getElementById('bs-password').value;
+  var pw2=document.getElementById('bs-confirm').value;
+  if(!name) return shake('bs-name','Please enter the contact name.');
+  if(!biz)  return shake('bs-bizname','Please enter your business name.');
+  if(!cat)  return shake('bs-category','Please select a category.');
+  if(!phone) return shake('bs-phone','Please enter a WhatsApp number.');
+  if(!emailOk(mail)) return shake('bs-email','Please enter a valid email address.');
+  if(pw.length<6) return shake('bs-password','Password must be at least 6 characters.');
+  if(pw!==pw2) return shake('bs-confirm','Passwords do not match.');
+  busy('bs-btn',true,'Register my business');
+  var r=await signUpBusiness({email:mail,password:pw,fullName:name,businessName:biz,category:cat,phone:phone});
+  busy('bs-btn',false,'Register my business');
+  if(r.error){
+    if(r.error.toLowerCase().includes('already')){
+      shake('bs-email','This email already has an account. Try logging in.');
+      window.switchTab('business','login');
+      var el=document.getElementById('bl-email'); if(el) el.value=mail;
+    } else shake('bs-email',r.error);
+    return;
+  }
+  if(r.needsConfirmation){ showSuccess('business','Check your email!','We sent a confirmation link to '+mail+'. Click it, then come back to log in.'); return; }
+  showSuccess('business','Welcome, '+biz+'!','Account created! Head to your dashboard to add listings. Our team verifies them within 24 hours.');
+  setTimeout(function(){ window.location.href='dashboard.html'; },2800);
+};
+
+// BUSINESS LOGIN
+window.doBusinessLogin = async function() {
+  var mail=document.getElementById('bl-email').value.trim();
+  var pw=document.getElementById('bl-password').value;
+  if(!emailOk(mail)) return shake('bl-email','Please enter your email address.');
+  if(!pw) return shake('bl-password','Please enter your password.');
+  busy('bl-btn',true,'Log in');
+  var r=await login(mail,pw);
+  busy('bl-btn',false,'Log in');
+  if(r.error){ if(r.error==='EMAIL_NOT_CONFIRMED') showConfirmNudge('business',mail); else shake('bl-password',r.error); return; }
+  var prof=r.profile||{};
+  var first=(prof.business_name||prof.full_name||mail).split(' ')[0];
+  showSuccess('business','Welcome back, '+first+'!','Logged in. Taking you to your dashboard\u2026');
+  setTimeout(function(){ window.location.href='dashboard.html'; },2000);
+};
+
+// ENQUIRY
+window.doEnquiry = async function() {
+  var name=document.getElementById('be-name').value.trim();
+  var phone=document.getElementById('be-phone').value.trim();
+  var mail=document.getElementById('be-email').value.trim();
+  var cat=document.getElementById('be-category').value;
+  var desc=document.getElementById('be-desc').value.trim();
+  if(!name)  return shake('be-name','Please enter your name.');
+  if(!phone) return shake('be-phone','Please enter a phone number.');
+  if(!cat)   return shake('be-category','Please select a category.');
+  if(!desc)  return shake('be-desc','Please add a short description.');
+  busy('be-btn',true,'Sending\u2026');
+  try { await supabase.from('enquiries').insert({name:name,phone:phone,email:mail||null,category:cat,description:desc,status:'new'}); }
+  catch(e2){ console.warn('Enquiry:',e2.message); }
+  busy('be-btn',false,'Send enquiry to our team');
+  showSuccess('business','Enquiry sent!','Thanks '+name+'! Our team will contact you on '+phone+' within 24 hours.');
+};
+window.submitBusiness = window.doEnquiry;
+
+// PASSWORD RESET
+window.openReset  = function(){ document.getElementById('reset-overlay').classList.add('open'); };
+window.closeReset = function(){ document.getElementById('reset-overlay').classList.remove('open'); };
+window.doReset = async function() {
+  var mail=document.getElementById('reset-email').value.trim();
+  if(!emailOk(mail)){ shake('reset-email','Please enter a valid email.'); return; }
+  var r=await sendPasswordReset(mail);
+  window.closeReset();
+  toast(r.success?'Reset link sent \u2014 check your inbox':(r.error||'Could not send reset email.'),!r.success);
+};
+</script>
+</body>
+</html>
