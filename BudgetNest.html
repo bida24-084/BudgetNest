@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BudgetNest — Student Marketplace</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2d6a4f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BudgetNest">
+
+<!-- SEO / share -->
+<meta name="description" content="Affordable accommodation, food, services and more — built for students in Botswana.">
+<meta property="og:title" content="BudgetNest — Student Marketplace">
+<meta property="og:description" content="Find affordable student deals across Gaborone campuses.">
+<meta property="og:type" content="website">
+
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f7f4ef;
+    --cream: #ede9e1;
+    --card: #ffffff;
+    --accent: #2d6a4f;
+    --accent-light: #52b788;
+    --accent-pale: #d8f3dc;
+    --warm: #e76f51;
+    --muted: #6b7280;
+    --border: #e0dbd2;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,244,239,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav-logo span { color: var(--warm); font-style: italic; }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links button {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); padding: 8px 14px; border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .nav-links button:hover, .nav-links button.active {
+    color: var(--accent); background: var(--accent-pale);
+  }
+  .nav-cta {
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 40px;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: #236040; }
+
+  /* HERO */
+  .hero {
+    padding: 80px 24px 60px;
+    max-width: 900px; margin: 0 auto; text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent-pale); color: var(--accent);
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+    padding: 6px 14px; border-radius: 40px;
+    margin-bottom: 20px; text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 6vw, 62px);
+    line-height: 1.1; margin-bottom: 18px;
+    color: var(--ink);
+  }
+  .hero h1 em { color: var(--accent); font-style: italic; }
+  .hero p {
+    font-size: 17px; color: var(--muted); max-width: 520px;
+    margin: 0 auto 32px; line-height: 1.7;
+  }
+  .hero-search {
+    display: flex; align-items: center;
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 50px; padding: 6px 6px 6px 20px;
+    max-width: 520px; margin: 0 auto;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+  }
+  .hero-search:focus-within { border-color: var(--accent-light); }
+  .hero-search input {
+    flex: 1; border: none; outline: none; background: none;
+    font-family: 'Sora', sans-serif; font-size: 14px; color: var(--ink);
+  }
+  .hero-search input::placeholder { color: #aaa; }
+  .hero-search button {
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 11px 22px; border-radius: 40px;
+    transition: background 0.2s;
+  }
+  .hero-search button:hover { background: #236040; }
+
+  /* STATS STRIP */
+  .stats-strip {
+    display: flex; justify-content: center; gap: 40px;
+    padding: 20px 24px 40px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--accent);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* MAIN CONTENT */
+  .main { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* CATEGORIES */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px; margin-bottom: 16px; color: var(--ink);
+  }
+  .categories {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .cat-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 40px; padding: 9px 16px; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); transition: all 0.2s;
+  }
+  .cat-btn:hover, .cat-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff;
+  }
+  .cat-btn .icon { font-size: 16px; }
+
+  /* LISTINGS GRID */
+  .listings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .listings-count { font-size: 13px; color: var(--muted); }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .listing-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .listing-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  }
+  .listing-img {
+    height: 160px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 54px;
+    background: var(--cream);
+    overflow: hidden;
+    position: relative;
+  }
+  .listing-img img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .35s ease;
+  }
+  .listing-card:hover .listing-img img { transform: scale(1.05); }
+  .listing-body { padding: 16px; }
+  .listing-cat {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--accent); margin-bottom: 6px;
+  }
+  .listing-title {
+    font-size: 15px; font-weight: 600; color: var(--ink);
+    margin-bottom: 6px; line-height: 1.3;
+  }
+  .listing-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+    margin-bottom: 12px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .listing-footer {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .listing-price {
+    font-size: 18px; font-weight: 700; color: var(--accent);
+  }
+  .listing-price span { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .listing-tag {
+    font-size: 11px; font-weight: 600;
+    background: var(--accent-pale); color: var(--accent);
+    padding: 4px 10px; border-radius: 40px;
+  }
+  .listing-tag.hot { background: #fde8e0; color: var(--warm); }
+  .badge-verified {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(255,255,255,0.9);
+    color: var(--accent); font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 40px;
+    border: 1px solid var(--accent-pale);
+  }
+
+  /* ADVERTISE SECTION */
+  .advertise-section {
+    background: var(--ink);
+    border-radius: 24px;
+    padding: 52px 48px;
+    margin-top: 60px;
+    display: flex; align-items: center; justify-content: space-between; gap: 40px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .advertise-left h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px; color: #fff; margin-bottom: 10px;
+  }
+  .advertise-left h2 em { color: var(--accent-light); font-style: italic; }
+  .advertise-left p { font-size: 14px; color: #999; line-height: 1.6; max-width: 400px; }
+  .pricing-cards { display: flex; gap: 12px; flex-shrink: 0; }
+  .pricing-card {
+    background: #2a2a2a; border: 1px solid #3a3a3a;
+    border-radius: 12px; padding: 20px; min-width: 130px; text-align: center;
+  }
+  .pricing-card.featured {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .pricing-type { font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .pricing-card.featured .pricing-type { color: rgba(255,255,255,0.7); }
+  .pricing-amount { font-family: 'DM Serif Display', serif; font-size: 26px; color: #fff; }
+  .pricing-period { font-size: 11px; color: #777; margin-top: 4px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.7); }
+  .advertise-btn {
+    display: block; margin-top: 20px;
+    background: var(--warm); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 13px 28px; border-radius: 40px; width: 100%;
+    transition: background 0.2s;
+  }
+  .advertise-btn:hover { background: #c45e3d; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 20px;
+    padding: 36px; max-width: 480px; width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    animation: popIn 0.25s ease both;
+  }
+  .modal h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px; margin-bottom: 6px;
+  }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; font-family: 'Sora', sans-serif; font-size: 14px;
+    color: var(--ink); background: var(--paper); outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent-light);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-cancel {
+    flex: 1; background: var(--cream); border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: 10px; color: var(--ink);
+    transition: background 0.2s;
+  }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-submit {
+    flex: 2; background: var(--accent); border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 12px; border-radius: 10px; color: #fff;
+    transition: background 0.2s;
+  }
+  .btn-submit:hover { background: #236040; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff;
+    font-size: 14px; font-weight: 600;
+    padding: 13px 24px; border-radius: 40px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 300;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center; padding: 60px 24px; color: var(--muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* KEYFRAMES */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @media (max-width: 640px) {
+    .advertise-section { flex-direction: column; padding: 32px 24px; }
+    .pricing-cards { width: 100%; }
+    .pricing-card { flex: 1; }
+    .stats-strip { gap: 24px; }
+    nav { padding: 0 16px; }
+    .nav-links { display: none; }
+    .hero { padding: 40px 16px 32px; }
+    .main { padding: 0 16px 100px; }
+    .listings-grid { grid-template-columns: 1fr; }
+    .nav-cta { display: none; }
+    .bottom-nav { display: grid; }
+  }
+
+  nav {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .install-banner {
+    display: none;
+    position: sticky; top: 64px; z-index: 90;
+    background: var(--accent); color: #fff;
+    padding: 12px 20px;
+    align-items: center; justify-content: space-between; gap: 12px;
+    font-size: 13px; font-weight: 600;
+  }
+  .install-banner.visible { display: flex; }
+  .install-banner button {
+    background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 7px 16px; border-radius: 40px; cursor: pointer; white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .install-banner button:hover { background: rgba(255,255,255,0.35); }
+  .install-banner .dismiss {
+    background: none; border: none; font-size: 20px; line-height: 1;
+    padding: 4px; cursor: pointer; color: rgba(255,255,255,0.7); flex-shrink: 0;
+  }
+
+  .bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(247,244,239,0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .bottom-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 4px; cursor: pointer; border: none; background: none;
+    font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 600;
+    color: var(--muted); transition: color 0.15s; min-height: 52px;
+    justify-content: center;
+  }
+  .bottom-nav-btn.active { color: var(--accent); }
+  .bottom-nav-btn .bnav-icon { font-size: 22px; line-height: 1; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo" style="text-decoration:none;">Budget<span>Nest</span></a>
+  <div class="nav-links">
+    <button class="active" onclick="showView('browse')">Browse</button>
+    <button onclick="showView('accommodation')">Accommodation</button>
+    <button onclick="showView('services')">Services</button>
+    <button onclick="showView('furniture')">Furniture</button>
+  </div>
+  <button class="nav-cta" onclick="goToBusinessPanel()">+ List Your Business</button>
+</nav>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="install-banner">
+  <span>📲 Install BudgetNest on your phone — works offline!</span>
+  <button id="install-btn">Install app</button>
+  <button class="dismiss" onclick="dismissBanner()" aria-label="Dismiss">×</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🇧🇼 Gaborone Students</div>
+  <h1>Find affordable deals <em>built</em> for students</h1>
+  <p>Accommodation, food, services & more — handpicked for students at UB, BUAN, BAC and beyond.</p>
+  <div class="hero-search">
+    <input type="text" id="search-input" placeholder="Search accommodation, food, tutors…" oninput="handleSearch()"/>
+    <button onclick="handleSearch()">Search</button>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat"><div class="stat-num" id="stat-listings">48</div><div class="stat-label">Active listings</div></div>
+  <div class="stat"><div class="stat-num">12</div><div class="stat-label">Business partners</div></div>
+  <div class="stat"><div class="stat-num">4</div><div class="stat-label">Campuses served</div></div>
+  <div class="stat"><div class="stat-num">P100</div><div class="stat-label">Student subscription</div></div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- CATEGORIES -->
+  <div class="section-title">Browse by category</div>
+  <div class="categories" id="categories">
+    <button class="cat-btn active" onclick="filterCat('all', this)"><span class="icon">🏠</span> All listings</button>
+    <button class="cat-btn" onclick="filterCat('accommodation', this)"><span class="icon">🛏️</span> Accommodation</button>
+    <button class="cat-btn" onclick="filterCat('food', this)"><span class="icon">🍱</span> Food supplies</button>
+    <button class="cat-btn" onclick="filterCat('salon', this)"><span class="icon">✂️</span> Salon</button>
+    <button class="cat-btn" onclick="filterCat('furniture', this)"><span class="icon">🪑</span> Furniture</button>
+    <button class="cat-btn" onclick="filterCat('tuition', this)"><span class="icon">📚</span> Tuition</button>
+    <button class="cat-btn" onclick="filterCat('laundry', this)"><span class="icon">👕</span> Laundry</button>
+    <button class="cat-btn" onclick="filterCat('repairs', this)"><span class="icon">🔧</span> Repairs</button>
+  </div>
+
+  <!-- LISTING GRID -->
+  <div class="listings-header">
+    <div class="section-title" style="margin-bottom:0" id="listings-heading">All listings</div>
+    <div class="listings-count" id="listings-count">48 results</div>
+  </div>
+  <div class="listings-grid" id="listings-grid"></div>
+
+  <!-- ADVERTISE CTA -->
+  <div class="advertise-section">
+    <div class="advertise-left">
+      <h2>Grow your business with <em>BudgetNest</em></h2>
+      <p>Reach thousands of students across Gaborone campuses. Start advertising from just P50 per month and grow your customer base today.</p>
+    </div>
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <div class="pricing-type">Small biz</div>
+        <div class="pricing-amount">P100</div>
+        <div class="pricing-period">per month</div>
+        <button class="advertise-btn" onclick="goToBusinessPanel()">Get started</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-type">Retail shop</div>
+        <div class="pricing-amount">P300</div>
+        <div class="pricing-period">per month</div>
+        <button class="advertise-btn" onclick="goToBusinessPanel()" style="background:rgba(0,0,0,0.2)">Get started</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL: List Business -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h3>List your business</h3>
+    <p class="modal-sub">Reach students across Gaborone campuses. We'll review and publish within 24 hours.</p>
+    <div class="form-group">
+      <label>Business name</label>
+      <input type="text" id="biz-name" placeholder="e.g. Naledi Hair Studio"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="biz-cat">
+          <option value="">Select…</option>
+          <option value="accommodation">Accommodation</option>
+          <option value="food">Food supplies</option>
+          <option value="salon">Salon</option>
+          <option value="furniture">Furniture</option>
+          <option value="tuition">Tuition</option>
+          <option value="laundry">Laundry</option>
+          <option value="repairs">Repairs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Monthly price (P)</label>
+        <input type="number" id="biz-price" placeholder="e.g. 500"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="biz-desc" placeholder="Briefly describe your product or service…"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Contact / WhatsApp number</label>
+      <input type="text" id="biz-contact" placeholder="e.g. 71234567"/>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-submit" onclick="submitListing()">Submit listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-btn active" onclick="bottomNav('browse', this)">
+    <span class="bnav-icon">🏠</span>Browse
+  </button>
+  <button class="bottom-nav-btn" onclick="bottomNav('accommodation', this)">
+    <span class="bnav-icon">🛏️</span>Rooms
+  </button>
+  <button class="bottom-nav-btn" onclick="bottomNav('food', this)">
+    <span class="bnav-icon">🍱</span>Food
+  </button>
+  <button class="bottom-nav-btn" onclick="goToBusinessPanel()">
+    <span class="bnav-icon">➕</span>List
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const sb = createClient(
+  'https://slxvjlfkyirnswcenhja.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNseHZqbGZreWlybnN3Y2VuaGphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjEzOTcsImV4cCI6MjA4OTM5NzM5N30.cL9qfkY3eOeob0IkLii7RDvK4bm__jOOY2RAFxGSg1w',
+  { auth:{ persistSession:true, autoRefreshToken:true, storage:window.localStorage } }
+);
+
+const CATEGORY_ICONS  = {accommodation:'🏠',food:'🍱',salon:'✂️',furniture:'🪑',tuition:'📚',laundry:'👕',repairs:'🔧',retail:'🛒',other:'📦'};
+const CATEGORY_COLORS = {accommodation:'#e8f4f8',food:'#f0f9ee',salon:'#fdf3e8',furniture:'#f5f0fb',tuition:'#fefce8',laundry:'#e8f8f5',repairs:'#fde8e8',retail:'#fff0e8',other:'#f5f5f5'};
+
+let allListings = [];
+let activeCategory = 'all';
+let searchQuery    = '';
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  // Auth guard — redirect unauthenticated users to login
+  const { data:{ user } } = await sb.auth.getUser();
+  if (!user) { window.location.href = 'index.html?panel=student&tab=login'; return; }
+
+  await loadListings();
+  registerSW();
+  setupInstallBanner();
+});
+
+// ── LOAD REAL LISTINGS FROM SUPABASE ─────────────────────────────────────────
+async function loadListings() {
+  const grid = document.getElementById('listings-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);font-size:14px">Loading listings&#x2026;</div>';
+
+  const { data, error } = await sb
+    .from('listings')
+    .select('*, profiles(business_name, phone)')
+    .eq('is_active', true)
+    .eq('is_verified', true)         // only admin-approved listings
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)">Could not load listings. Please try refreshing.</div>';
+    return;
+  }
+
+  allListings = data || [];
+  document.getElementById('stat-listings').textContent = allListings.length;
+  renderListings();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderListings() {
+  const grid = document.getElementById('listings-grid');
+
+  let filtered = allListings.filter(l => {
+    const matchCat    = activeCategory === 'all' || l.category === activeCategory;
+    const q           = searchQuery.toLowerCase();
+    const matchSearch = !q ||
+      (l.title       || '').toLowerCase().includes(q) ||
+      (l.description || '').toLowerCase().includes(q) ||
+      (l.category    || '').toLowerCase().includes(q) ||
+      (l.profiles?.business_name || '').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+
+  document.getElementById('listings-count').textContent =
+    filtered.length + ' result' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>No listings found. Try a different search or category.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(l => {
+    const icon  = CATEGORY_ICONS[l.category]  || '📦';
+    const color = CATEGORY_COLORS[l.category] || '#f5f5f5';
+    const biz   = l.profiles?.business_name || '';
+    const phone = l.profiles?.phone || '';
+
+    // Image: show real photo if available, fallback to emoji
+    const imgHtml = l.image_url
+      ? '<img src="' + esc(l.image_url) + '" alt="' + esc(l.title) + '" loading="lazy"/>'
+      : icon;
+
+    const imgStyle = l.image_url
+      ? 'background:#000'
+      : 'background:' + color;
+
+    return '<div class="listing-card" onclick="openListing(\'' + l.id + '\')">' +
+      '<div class="badge-verified">&#10003; Verified</div>' +
+      '<div class="listing-img" style="' + imgStyle + '">' + imgHtml + '</div>' +
+      '<div class="listing-body">' +
+        '<div class="listing-cat">' + esc(l.category) + '</div>' +
+        '<div class="listing-title">' + esc(l.title) + '</div>' +
+        '<div class="listing-desc">' + esc(l.description || '') + '</div>' +
+        '<div class="listing-footer">' +
+          '<div class="listing-price">P' + Number(l.price || 0).toFixed(2) + '<span> ' + esc(l.price_period || '') + '</span></div>' +
+          (biz ? '<div class="listing-tag">' + esc(biz) + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── LISTING DETAIL (contact via WhatsApp) ────────────────────────────────────
+window.openListing = function(id) {
+  var l = allListings.find(x => x.id === id);
+  if (!l) return;
+  var phone = l.profiles?.phone || '';
+  var msg   = 'Hi! I saw your listing on BudgetNest: "' + l.title + '" at P' + Number(l.price||0).toFixed(2) + ' ' + (l.price_period||'') + '. I am interested, please tell me more.';
+  if (phone) {
+    // Clean phone number for WhatsApp link
+    var clean = phone.replace(/[^0-9+]/g, '');
+    if (clean.startsWith('0')) clean = '+267' + clean.slice(1);
+    window.open('https://wa.me/' + clean.replace('+','') + '?text=' + encodeURIComponent(msg), '_blank');
+  } else {
+    showToast('Contact: ' + (l.profiles?.business_name || l.title));
+  }
+};
+
+// ── FILTER & SEARCH ───────────────────────────────────────────────────────────
+window.filterCat = function(cat, btn) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = {all:'All listings',accommodation:'Accommodation',food:'Food supplies',salon:'Salon & beauty',furniture:'Furniture',tuition:'Tuition',laundry:'Laundry',repairs:'Repairs',retail:'Retail',other:'Other'};
+  document.getElementById('listings-heading').textContent = labels[cat] || 'Listings';
+  renderListings();
+};
+
+window.handleSearch = function() {
+  searchQuery = document.getElementById('search-input').value;
+  renderListings();
+};
+
+// ── SUBMIT LISTING (redirect businesses to dashboard) ─────────────────────────
+window.submitListing = function() {
+  window.location.href = 'dashboard.html';
+};
+
+// ── HELPER ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+window.showToast = function(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2800);
+};
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW:', e));
+  }
+}
+
+// ── PWA INSTALL BANNER ────────────────────────────────────────────────────────
+function setupInstallBanner() {
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.style.display = 'flex';
+  });
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.addEventListener('click', () => {
+    if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; }
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', () => {
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.style.display = 'none';
+  });
+}
+</script>
+</body>
+</html>

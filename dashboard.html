@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BudgetNest — Business Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a2e1e;--paper:#f7f4ef;--cream:#ede9e1;--card:#fff;--green:#2d6a4f;--green-light:#52b788;--green-pale:#d8f3dc;--warm:#e76f51;--warm-pale:#fde8e0;--muted:#6b7280;--border:#e0dbd2;--radius:14px;--sidebar:240px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Sora',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+/* sidebar */
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);background:var(--ink);display:flex;flex-direction:column;z-index:100}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo-text{font-family:'DM Serif Display',serif;font-size:22px;color:var(--paper)}
+.logo-text em{color:var(--warm);font-style:italic}
+.logo-sub{font-size:10px;font-weight:700;color:var(--green-light);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav-section{padding:16px 12px 4px;font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;margin:2px 8px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.6);transition:background .15s,color .15s;border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:var(--green);color:#fff}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid rgba(255,255,255,.08)}
+.biz-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:10px;margin-bottom:10px}
+.biz-avatar{width:32px;height:32px;border-radius:50%;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.biz-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3}
+.biz-role{font-size:10px;color:rgba(255,255,255,.4)}
+.btn-logout{display:block;width:100%;background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;padding:8px;border-radius:8px;cursor:pointer;transition:all .2s}
+.btn-logout:hover{border-color:var(--warm);color:var(--warm)}
+/* main */
+.main{margin-left:var(--sidebar);min-height:100vh}
+.topbar{height:64px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:20px}
+.btn-new{background:var(--green);color:#fff;border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:700;padding:10px 20px;border-radius:40px;transition:opacity .2s}
+.btn-new:hover{opacity:.88}
+.content{padding:28px}
+/* stats */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px 18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.stat-card.green::before{background:var(--green)}
+.stat-card.warm::before{background:var(--warm)}
+.stat-card.teal::before{background:var(--green-light)}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--ink);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px}
+/* section */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-family:'DM Serif Display',serif;font-size:22px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{background:var(--card);border:1.5px solid var(--border);font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--muted);padding:7px 14px;border-radius:40px;cursor:pointer;transition:all .15s}
+.filter-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+/* listing cards */
+.listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+.listing-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.card-img{height:160px;position:relative;overflow:hidden;background:var(--cream);flex-shrink:0}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.listing-card:hover .card-img img{transform:scale(1.04)}
+.card-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px}
+.card-status{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:40px;backdrop-filter:blur(8px)}
+.s-pending{background:rgba(255,243,178,.9);color:#92400e}
+.s-live{background:rgba(216,243,220,.9);color:#1a5c37}
+.s-inactive{background:rgba(224,219,210,.9);color:#555}
+.card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+.card-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:4px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.card-price{font-size:16px;font-weight:700;color:var(--green);margin-bottom:6px}
+.card-price span{font-size:12px;font-weight:400;color:var(--muted)}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border)}
+.act-btn{background:none;border:1.5px solid var(--border);font-family:'Sora',sans-serif;font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s;color:var(--muted)}
+.act-btn:hover{border-color:var(--green);color:var(--green)}
+.act-btn.danger:hover{border-color:var(--warm);color:var(--warm)}
+/* image uploader */
+.img-uploader{border:2.5px dashed var(--border);border-radius:12px;overflow:hidden;position:relative;background:var(--cream);cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px}
+.img-uploader:hover,.img-uploader.drag{border-color:var(--green);background:#f0fbf4}
+.img-uploader input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.img-uploader-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;gap:10px;pointer-events:none}
+.img-uploader-icon{font-size:36px}
+.img-uploader h4{font-size:14px;font-weight:700;color:var(--ink)}
+.img-uploader p{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
+.img-preview{position:relative;width:100%;height:200px;background:#000}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.img-preview-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.img-preview-name{font-size:12px;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.img-remove{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;transition:background .15s;flex-shrink:0}
+.img-remove:hover{background:var(--warm)}
+.img-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--green-light);transition:width .3s;width:0}
+/* form fields */
+.form-wrap{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:32px;max-width:580px}
+.f-group{margin-bottom:16px}
+.f-group label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.f-group input,.f-group select,.f-group textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Sora',sans-serif;font-size:14px;color:var(--ink);background:var(--paper);outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.f-group input:focus,.f-group select:focus,.f-group textarea:focus{border-color:var(--green-light);box-shadow:0 0 0 3px rgba(82,183,136,.12)}
+.f-group textarea{resize:vertical;min-height:80px;line-height:1.6}
+.f-group select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn-submit{width:100%;background:var(--green);color:#fff;border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;padding:14px;border-radius:40px;transition:opacity .2s;margin-top:8px}
+.btn-submit:hover{opacity:.88}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed}
+/* notice */
+.notice{border-radius:10px;padding:14px 16px;font-size:13px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;line-height:1.55}
+.notice.info{background:var(--green-pale);color:var(--green)}
+.notice.warn{background:var(--warm-pale);color:var(--warm)}
+.notice-icon{flex-shrink:0;font-size:16px}
+/* edit modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:18px;padding:36px 32px;max-width:560px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.18);margin:auto;animation:popIn .22s ease both}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal h3{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.modal-foot{display:flex;gap:10px;margin-top:22px}
+.btn-cancel{flex:1;background:var(--cream);border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;padding:12px;border-radius:10px;color:var(--ink)}
+.btn-save{flex:2;background:var(--green);border:none;cursor:pointer;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;padding:12px;border-radius:10px;color:#fff;transition:opacity .2s}
+.btn-save:hover{opacity:.88}
+.btn-save:disabled{opacity:.55;cursor:not-allowed}
+/* profile */
+.profile-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:32px;max-width:520px}
+.p-avatar{width:80px;height:80px;border-radius:50%;background:var(--warm);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;margin-bottom:18px;font-family:'DM Serif Display',serif}
+.p-name{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:4px}
+.p-badge{display:inline-block;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:700;padding:4px 12px;border-radius:40px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:18px}
+.p-row{display:flex;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.p-row strong{color:var(--ink);min-width:120px}
+/* empty */
+.empty{text-align:center;padding:60px 24px;color:var(--muted);grid-column:1/-1}
+.empty-icon{font-size:48px;margin-bottom:14px}
+.empty h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);margin-bottom:8px}
+.empty p{font-size:13px;line-height:1.6;max-width:300px;margin:0 auto 20px}
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:12px 22px;border-radius:40px;opacity:0;transition:all .28s;pointer-events:none;z-index:300}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--warm)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.f-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">Budget<em>Nest</em></div>
+    <div class="logo-sub">Business Dashboard</div>
+  </div>
+  <div class="nav-section">Manage</div>
+  <button class="nav-item active" onclick="showSection('listings',this)"><span class="nav-icon">&#128203;</span> My Listings</button>
+  <button class="nav-item" onclick="showSection('add',this)"><span class="nav-icon">&#43;</span> Add New Listing</button>
+  <div class="nav-section">Account</div>
+  <button class="nav-item" onclick="showSection('profile',this)"><span class="nav-icon">&#128100;</span> My Profile</button>
+  <button class="nav-item" onclick="window.location.href='BudgetNest.html'"><span class="nav-icon">&#127968;</span> Browse Marketplace</button>
+  <div class="sidebar-footer">
+    <div class="biz-chip">
+      <div class="biz-avatar" id="biz-avatar">B</div>
+      <div><div class="biz-name" id="biz-name">My Business</div><div class="biz-role">Business account</div></div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Sign out</button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">My Listings</div>
+    <div><button class="btn-new" onclick="showSection('add',document.querySelectorAll('.nav-item')[1])">+ Add Listing</button></div>
+  </div>
+  <div class="content">
+
+    <!-- LISTINGS -->
+    <div id="sec-listings">
+      <div class="stat-grid">
+        <div class="stat-card green"><div class="stat-label">Total listings</div><div class="stat-value" id="stat-total">-</div><div class="stat-sub">all time</div></div>
+        <div class="stat-card teal"><div class="stat-label">Live &amp; verified</div><div class="stat-value" id="stat-live">-</div><div class="stat-sub">visible to students</div></div>
+        <div class="stat-card warm"><div class="stat-label">Pending review</div><div class="stat-value" id="stat-pending">-</div><div class="stat-sub">awaiting admin approval</div></div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">Your listings</div>
+        <div class="filter-row">
+          <button class="filter-btn active" onclick="filterListings('all',this)">All</button>
+          <button class="filter-btn" onclick="filterListings('live',this)">Live</button>
+          <button class="filter-btn" onclick="filterListings('pending',this)">Pending</button>
+          <button class="filter-btn" onclick="filterListings('inactive',this)">Inactive</button>
+        </div>
+      </div>
+      <div class="listings-grid" id="listings-grid">
+        <div class="empty"><div class="empty-icon">&#8987;</div><p>Loading&#x2026;</p></div>
+      </div>
+    </div>
+
+    <!-- ADD LISTING -->
+    <div id="sec-add" style="display:none">
+      <div class="section-title" style="margin-bottom:18px">Add a new listing</div>
+      <div class="notice info"><span class="notice-icon">&#8505;</span><span>Your listing will be reviewed by our admin team before going live — usually within 24 hours. Add as many listings as you like.</span></div>
+      <div class="form-wrap">
+
+        <!-- IMAGE UPLOADER -->
+        <div class="f-group">
+          <label>Listing photo <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--muted)">(optional but recommended)</span></label>
+          <div class="img-uploader" id="add-img-uploader">
+            <input type="file" id="add-img-input" accept="image/*" onchange="handleImgSelect('add')"/>
+            <div class="img-uploader-inner" id="add-img-placeholder">
+              <div class="img-uploader-icon">&#128247;</div>
+              <h4>Drop a photo here or click to browse</h4>
+              <p>JPG, PNG or WEBP &middot; Max 5 MB<br>Auto-compressed for fast loading</p>
+            </div>
+            <div class="img-preview" id="add-img-preview" style="display:none">
+              <img id="add-img-thumb" src="" alt="Preview"/>
+              <div class="img-preview-bar">
+                <span class="img-preview-name" id="add-img-name"></span>
+                <button class="img-remove" onclick="removeImg('add')">&#10005; Remove</button>
+              </div>
+              <div class="img-progress" id="add-img-progress"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="f-group"><label>Listing title</label><input type="text" id="add-title" placeholder="e.g. Self-contained room near BAC"/></div>
+        <div class="f-row">
+          <div class="f-group"><label>Category</label>
+            <select id="add-category">
+              <option value="">Select&#x2026;</option>
+              <option value="accommodation">Accommodation</option>
+              <option value="food">Food supplies</option>
+              <option value="salon">Salon &amp; beauty</option>
+              <option value="furniture">Furniture</option>
+              <option value="tuition">Tuition</option>
+              <option value="laundry">Laundry</option>
+              <option value="repairs">Repairs</option>
+              <option value="retail">Retail shop</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="f-group"><label>Price (P)</label><input type="number" id="add-price" placeholder="e.g. 1800" min="0"/></div>
+        </div>
+        <div class="f-group"><label>Price period</label>
+          <select id="add-period">
+            <option value="month">/month</option><option value="week">/week</option>
+            <option value="once">once-off</option><option value="hour">/hour</option>
+            <option value="session">/session</option><option value="load">/load</option>
+          </select>
+        </div>
+        <div class="f-group"><label>Description</label><textarea id="add-desc" placeholder="Describe your product or service &#x2014; include location, availability, and any student discounts&#x2026;"></textarea></div>
+        <button class="btn-submit" id="add-btn" onclick="submitListing()">Submit listing for review</button>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="sec-profile" style="display:none">
+      <div class="section-title" style="margin-bottom:18px">My Profile</div>
+      <div class="profile-card">
+        <div class="p-avatar" id="p-avatar">B</div>
+        <div class="p-name" id="p-name">&#x2014;</div>
+        <div class="p-badge">Business account</div>
+        <div class="p-row"><strong>Business name</strong><span id="p-biz">&#x2014;</span></div>
+        <div class="p-row"><strong>Category</strong><span id="p-cat">&#x2014;</span></div>
+        <div class="p-row"><strong>Email</strong><span id="p-email">&#x2014;</span></div>
+        <div class="p-row"><strong>WhatsApp</strong><span id="p-phone">&#x2014;</span></div>
+        <div class="p-row"><strong>Member since</strong><span id="p-joined">&#x2014;</span></div>
+        <div class="notice warn" style="margin-top:20px"><span class="notice-icon">&#9888;</span><span>To update your business details, contact the admin team at <strong>budgetnest@student.bac.bw</strong></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <h3>Edit listing</h3>
+    <p class="modal-sub">Changes are saved immediately. Listing status is not reset.</p>
+    <input type="hidden" id="edit-id"/>
+
+    <!-- Edit image uploader -->
+    <div class="f-group">
+      <label>Photo <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--muted)">(leave unchanged to keep existing)</span></label>
+      <div class="img-uploader" id="edit-img-uploader">
+        <input type="file" id="edit-img-input" accept="image/*" onchange="handleImgSelect('edit')"/>
+        <div class="img-uploader-inner" id="edit-img-placeholder">
+          <div class="img-uploader-icon">&#128247;</div>
+          <h4>Replace photo</h4>
+          <p>Click or drop a new image here</p>
+        </div>
+        <div class="img-preview" id="edit-img-preview" style="display:none">
+          <img id="edit-img-thumb" src="" alt="Preview"/>
+          <div class="img-preview-bar">
+            <span class="img-preview-name" id="edit-img-name"></span>
+            <button class="img-remove" onclick="removeImg('edit')">&#10005; Remove</button>
+          </div>
+          <div class="img-progress" id="edit-img-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="f-group"><label>Title</label><input type="text" id="edit-title"/></div>
+    <div class="f-row">
+      <div class="f-group"><label>Category</label>
+        <select id="edit-category">
+          <option value="accommodation">Accommodation</option><option value="food">Food supplies</option>
+          <option value="salon">Salon &amp; beauty</option><option value="furniture">Furniture</option>
+          <option value="tuition">Tuition</option><option value="laundry">Laundry</option>
+          <option value="repairs">Repairs</option><option value="retail">Retail shop</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="f-group"><label>Price (P)</label><input type="number" id="edit-price" min="0"/></div>
+    </div>
+    <div class="f-group"><label>Price period</label>
+      <select id="edit-period">
+        <option value="month">/month</option><option value="week">/week</option>
+        <option value="once">once-off</option><option value="hour">/hour</option>
+        <option value="session">/session</option><option value="load">/load</option>
+      </select>
+    </div>
+    <div class="f-group"><label>Description</label><textarea id="edit-desc"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-save" id="edit-save" onclick="saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const sb = createClient(
+  'https://slxvjlfkyirnswcenhja.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNseHZqbGZreWlybnN3Y2VuaGphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjEzOTcsImV4cCI6MjA4OTM5NzM5N30.cL9qfkY3eOeob0IkLii7RDvK4bm__jOOY2RAFxGSg1w',
+  { auth:{ persistSession:true, autoRefreshToken:true, storage:window.localStorage } }
+);
+
+const CAT_ICONS  = {accommodation:'🏠',food:'🍱',salon:'✂️',furniture:'🪑',tuition:'📚',laundry:'👕',repairs:'🔧',retail:'🛒',other:'📦'};
+const CAT_COLORS = {accommodation:'#e8f4f8',food:'#f0f9ee',salon:'#fdf3e8',furniture:'#f5f0fb',tuition:'#fefce8',laundry:'#e8f8f5',repairs:'#fde8e8',retail:'#fff0e8',other:'#f5f5f5'};
+
+let profile = null, allListings = [], currentFilter = 'all';
+const imgState = { add: null, edit: null };
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data:{ user } } = await sb.auth.getUser();
+  if (!user) { window.location.href = 'index.html?panel=business&tab=login'; return; }
+  const { data:prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (!prof || prof.user_type === 'student') { window.location.href = 'BudgetNest.html'; return; }
+  profile = prof;
+  var biz = prof.business_name || prof.full_name || 'My Business';
+  var ini = biz.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  document.getElementById('biz-avatar').textContent = ini;
+  document.getElementById('biz-name').textContent   = biz;
+  fillProfile(prof);
+  setupDragDrop('add');
+  setupDragDrop('edit');
+  await loadListings();
+});
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+window.showSection = function(name, btn) {
+  ['listings','add','profile'].forEach(function(s){
+    document.getElementById('sec-'+s).style.display = s===name ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var titles = {listings:'My Listings',add:'Add New Listing',profile:'My Profile'};
+  document.getElementById('topbar-title').textContent = titles[name]||name;
+};
+
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+async function loadListings() {
+  var { data, error } = await sb.from('listings')
+    .select('*').eq('business_id', profile.id).order('created_at',{ascending:false});
+  if (error) { toast('Error: '+error.message, true); return; }
+  allListings = data || [];
+  document.getElementById('stat-total').textContent   = allListings.length;
+  document.getElementById('stat-live').textContent    = allListings.filter(function(l){ return l.is_active&&l.is_verified; }).length;
+  document.getElementById('stat-pending').textContent = allListings.filter(function(l){ return l.is_active&&!l.is_verified; }).length;
+  render();
+}
+
+function render() {
+  var g = document.getElementById('listings-grid');
+  var rows = allListings;
+  if (currentFilter==='live')     rows = allListings.filter(function(l){ return l.is_active&&l.is_verified; });
+  if (currentFilter==='pending')  rows = allListings.filter(function(l){ return l.is_active&&!l.is_verified; });
+  if (currentFilter==='inactive') rows = allListings.filter(function(l){ return !l.is_active; });
+  if (!rows.length) {
+    g.innerHTML = '<div class="empty"><div class="empty-icon">&#128203;</div><h3>No listings yet</h3><p>Click Add Listing to create your first one.</p></div>';
+    return;
+  }
+  g.innerHTML = rows.map(function(l) {
+    var icon  = CAT_ICONS[l.category]  || '&#128230;';
+    var color = CAT_COLORS[l.category] || '#f5f5f5';
+    var imgHtml = l.image_url
+      ? '<img src="'+esc(l.image_url)+'" alt="'+esc(l.title)+'" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>'
+      : '<div class="card-img-placeholder" style="background:'+color+'">'+icon+'</div>';
+    var badge = !l.is_active
+      ? '<span class="card-status s-inactive">Inactive</span>'
+      : l.is_verified
+        ? '<span class="card-status s-live">&#10003; Live</span>'
+        : '<span class="card-status s-pending">Pending review</span>';
+    return '<div class="listing-card">'+
+      '<div class="card-img">'+imgHtml+badge+'</div>'+
+      '<div class="card-body">'+
+        '<div class="card-cat">'+esc(l.category)+'</div>'+
+        '<div class="card-title">'+esc(l.title)+'</div>'+
+        '<div class="card-price">P'+Number(l.price||0).toFixed(2)+' <span>'+esc(l.price_period||'')+'</span></div>'+
+        '<div class="card-desc">'+esc(l.description||'')+'</div>'+
+      '</div>'+
+      '<div class="card-actions">'+
+        '<button class="act-btn" onclick="openEdit(\''+l.id+'\')">Edit</button>'+
+        (l.is_active
+          ? '<button class="act-btn danger" onclick="deactivate(\''+l.id+'\')">Deactivate</button>'
+          : '<button class="act-btn" onclick="reactivate(\''+l.id+'\')">Reactivate</button>')+
+        '<button class="act-btn danger" onclick="del(\''+l.id+'\')">Delete</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+window.filterListings = function(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active'); render();
+};
+
+// ── IMAGE HANDLING ────────────────────────────────────────────────────────────
+function setupDragDrop(prefix) {
+  var uploader = document.getElementById(prefix+'-img-uploader');
+  if (!uploader) return;
+  uploader.addEventListener('dragover',  function(e){ e.preventDefault(); uploader.classList.add('drag'); });
+  uploader.addEventListener('dragleave', function(){ uploader.classList.remove('drag'); });
+  uploader.addEventListener('drop', function(e){
+    e.preventDefault(); uploader.classList.remove('drag');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) processImgFile(prefix, e.dataTransfer.files[0]);
+  });
+}
+window.handleImgSelect = function(prefix) {
+  var input = document.getElementById(prefix+'-img-input');
+  if (input && input.files[0]) processImgFile(prefix, input.files[0]);
+};
+function processImgFile(prefix, file) {
+  if (!file.type.startsWith('image/')) { toast('Please select an image file.', true); return; }
+  if (file.size > 10 * 1024 * 1024)   { toast('Image too large (max 10 MB).', true); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var MAX = 1200, w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+      imgState[prefix] = { dataUrl: dataUrl, name: file.name };
+      showImgPreview(prefix, dataUrl, file.name);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function showImgPreview(prefix, dataUrl, name) {
+  document.getElementById(prefix+'-img-placeholder').style.display = 'none';
+  var prev = document.getElementById(prefix+'-img-preview');
+  prev.style.display = 'block';
+  document.getElementById(prefix+'-img-thumb').src = dataUrl;
+  document.getElementById(prefix+'-img-name').textContent = name;
+}
+function getImageDataUrl(prefix) {
+  var state = imgState[prefix]; if (!state) return null;
+  var bar = document.getElementById(prefix+'-img-progress');
+  if (bar) { bar.style.width='60%'; setTimeout(function(){ bar.style.width='100%'; },150); setTimeout(function(){ bar.style.width='0'; },900); }
+  return state.dataUrl;
+}
+window.removeImg = function(prefix) {
+  imgState[prefix] = null;
+  var inp = document.getElementById(prefix+'-img-input'); if(inp) inp.value='';
+  document.getElementById(prefix+'-img-placeholder').style.display = '';
+  document.getElementById(prefix+'-img-preview').style.display = 'none';
+  if (prefix==='edit') { var eid=document.getElementById('edit-id'); if(eid) eid.dataset.removeImg='1'; }
+};
+
+// ── SUBMIT NEW LISTING ────────────────────────────────────────────────────────
+window.submitListing = async function() {
+  var title = document.getElementById('add-title').value.trim();
+  var cat   = document.getElementById('add-category').value;
+  var price = parseFloat(document.getElementById('add-price').value);
+  var per   = document.getElementById('add-period').value;
+  var desc  = document.getElementById('add-desc').value.trim();
+  if (!title) return shake('add-title',    'Please enter a listing title.');
+  if (!cat)   return shake('add-category', 'Please select a category.');
+  if (!price || price <= 0) return shake('add-price', 'Please enter a valid price.');
+  if (!desc)  return shake('add-desc',     'Please add a description.');
+
+  var btn = document.getElementById('add-btn');
+  btn.disabled = true; btn.textContent = 'Submitting\u2026';
+
+  var imageDataUrl = imgState.add ? getImageDataUrl('add') : null;
+
+  var { error } = await sb.from('listings').insert({
+    business_id:  profile.id,
+    title:        title,
+    category:     cat,
+    price:        price,
+    price_period: per,
+    description:  desc,
+    is_active:    true,
+    is_verified:  false,
+    image_url:    imageDataUrl
+  });
+
+  btn.disabled = false; btn.textContent = 'Submit listing for review';
+
+  if (error) { toast('Could not save listing: ' + error.message, true); return; }
+
+  imgState.add = null;
+  ['add-title','add-price','add-desc'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('add-category').value = '';
+  document.getElementById('add-period').value   = 'month';
+  removeImg('add');
+  toast('Listing submitted! Admin team will review within 24 hours.');
+  await loadListings();
+  window.showSection('listings', document.querySelectorAll('.nav-item')[0]);
+};
+
+// ── EDIT ──────────────────────────────────────────────────────────────────────
+window.openEdit = function(id) {
+  var l = allListings.find(function(x){ return x.id===id; }); if (!l) return;
+  document.getElementById('edit-id').value          = l.id;
+  document.getElementById('edit-id').dataset.removeImg = '';
+  document.getElementById('edit-title').value       = l.title||'';
+  document.getElementById('edit-category').value    = l.category||'';
+  document.getElementById('edit-price').value       = l.price||'';
+  document.getElementById('edit-period').value      = l.price_period||'month';
+  document.getElementById('edit-desc').value        = l.description||'';
+  imgState.edit = null;
+  if (l.image_url) { showImgPreview('edit', l.image_url, 'Current photo'); }
+  else { removeImg('edit'); document.getElementById('edit-id').dataset.removeImg=''; }
+  document.getElementById('edit-modal').classList.add('open');
+};
+window.closeEdit = function(){ document.getElementById('edit-modal').classList.remove('open'); };
+
+window.saveEdit = async function() {
+  var id    = document.getElementById('edit-id').value;
+  var rmImg = document.getElementById('edit-id').dataset.removeImg === '1';
+  var title = document.getElementById('edit-title').value.trim();
+  var cat   = document.getElementById('edit-category').value;
+  var price = parseFloat(document.getElementById('edit-price').value);
+  var per   = document.getElementById('edit-period').value;
+  var desc  = document.getElementById('edit-desc').value.trim();
+  if (!title) return shake('edit-title',    'Please enter a title.');
+  if (!cat)   return shake('edit-category', 'Please select a category.');
+  if (!price||price<=0) return shake('edit-price','Please enter a valid price.');
+  if (!desc)  return shake('edit-desc',     'Please add a description.');
+  var btn = document.getElementById('edit-save');
+  btn.disabled=true; btn.textContent='Saving\u2026';
+  var updates = {title:title, category:cat, price:price, price_period:per, description:desc};
+  if (imgState.edit) { updates.image_url = getImageDataUrl('edit'); imgState.edit=null; }
+  else if (rmImg)    { updates.image_url = null; }
+  var { error } = await sb.from('listings').update(updates).eq('id',id).eq('business_id',profile.id);
+  btn.disabled=false; btn.textContent='Save changes';
+  if (error) { toast('Error: '+error.message,true); return; }
+  closeEdit(); toast('Listing updated successfully.'); await loadListings();
+};
+
+// ── DEACTIVATE / REACTIVATE / DELETE ─────────────────────────────────────────
+window.deactivate = async function(id) {
+  if (!confirm('Deactivate this listing? It will be hidden from students but not deleted.')) return;
+  var {error} = await sb.from('listings').update({is_active:false}).eq('id',id).eq('business_id',profile.id);
+  if (error) { toast('Error: '+error.message,true); return; }
+  toast('Listing deactivated.'); await loadListings();
+};
+window.reactivate = async function(id) {
+  var {error} = await sb.from('listings').update({is_active:true}).eq('id',id).eq('business_id',profile.id);
+  if (error) { toast('Error: '+error.message,true); return; }
+  toast('Listing reactivated.'); await loadListings();
+};
+window.del = async function(id) {
+  if (!confirm('Permanently delete this listing? This cannot be undone.')) return;
+  var {error} = await sb.from('listings').delete().eq('id',id).eq('business_id',profile.id);
+  if (error) { toast('Error: '+error.message,true); return; }
+  toast('Listing deleted.'); await loadListings();
+};
+
+// ── PROFILE ───────────────────────────────────────────────────────────────────
+function fillProfile(p) {
+  var biz = p.business_name||p.full_name||'My Business';
+  var ini = biz.split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0,2);
+  document.getElementById('p-avatar').textContent  = ini;
+  document.getElementById('p-name').textContent    = p.full_name||'—';
+  document.getElementById('p-biz').textContent     = p.business_name||'—';
+  document.getElementById('p-cat').textContent     = p.category||'—';
+  document.getElementById('p-email').textContent   = p.email||'—';
+  document.getElementById('p-phone').textContent   = p.phone||'—';
+  document.getElementById('p-joined').textContent  = p.created_at
+    ? new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '—';
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+window.doLogout = async function(){ await sb.auth.signOut(); window.location.href='index.html'; };
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function toast(msg, err) {
+  var el = document.getElementById('toast'); if (!el) return;
+  el.textContent = msg;
+  el.className = 'toast'+(err?' err':'')+' show';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('show'); }, 3600);
+}
+function shake(id, msg) {
+  var el = document.getElementById(id); if (!el) return;
+  el.style.borderColor='#e76f51'; el.style.boxShadow='0 0 0 3px rgba(231,111,81,.15)';
+  try{el.focus();}catch(e){}
+  setTimeout(function(){ el.style.borderColor=''; el.style.boxShadow=''; },1800);
+  var par=(el.closest?el.closest('.f-group'):null)||el.parentElement;
+  var tip=par?par.querySelector('.field-tip'):null;
+  if(!tip&&par){tip=document.createElement('div');tip.className='field-tip';tip.style.cssText='font-size:11px;color:#e76f51;margin-top:5px;font-weight:600;';par.appendChild(tip);}
+  if(tip){tip.textContent=msg;setTimeout(function(){ if(tip.parentNode)tip.remove(); },2600);}
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
